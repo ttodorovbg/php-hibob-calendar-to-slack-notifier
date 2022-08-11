@@ -3,4 +3,4 @@
 /app/sqlite/*.sqlite
 .env
 .lh
-
+.private

@@ -1,5 +1,5 @@
 FROM alpine:3.16
-RUN apk update && apk add --no-cache php curl php-mbstring php8-sqlite3 php-openssl php-phar tini libc6-compat
+RUN apk update && apk add --no-cache php curl php-mbstring php8-sqlite3 php-openssl php-phar php-curl tini libc6-compat
 
 
 # Install Composer

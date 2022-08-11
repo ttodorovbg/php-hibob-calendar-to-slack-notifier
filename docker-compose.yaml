@@ -11,4 +11,5 @@ services:
       - ./app:/home/calendar/app
     environment:
       ICS_URL: ${ICS_URL}
+      SLACK_WEBHOOK: ${SLACK_WEBHOOK}
     tty: true 

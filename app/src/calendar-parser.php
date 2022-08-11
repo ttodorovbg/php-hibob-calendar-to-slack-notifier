@@ -124,5 +124,56 @@ if ($result->numColumns()) {
 
 print_r($db_res);
 
+slackNotify($db_res);
+
 // Close the connection
 $db->close();
+
+function slackNotify(array $data)
+{
+    $attachments = [];
+
+    foreach ($data as $entry) {
+        $attachments[] = [
+            'fields' => [
+                [
+                    'title' => 'Name', 
+                    'value' => $entry['name'], 
+                    'short' => true,
+                ],
+                [
+                    'title' => 'Anniversary', 
+                    'value' => $entry['anniversary'], 
+                    'short' => true,
+                ],
+                [
+                    'title' => 'Created', 
+                    'value' => $entry['created'], 
+                    'short' => true,
+                ],
+                [
+                    'title' => 'Deleted', 
+                    'value' => $entry['deleted'], 
+                    'short' => true,
+                ],
+            ],
+        ];      
+    }
+
+    $webhook_data = [
+        'text' => 'Staff changes',
+        'attachments' => $attachments,
+    ];
+
+    $webhook_url = getenv('SLACK_WEBHOOK');
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $webhook_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($webhook_data));
+
+    $result = curl_exec($ch);
+
+    curl_close($ch);
+}
