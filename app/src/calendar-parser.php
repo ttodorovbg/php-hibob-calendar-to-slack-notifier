@@ -131,38 +131,45 @@ $db->close();
 
 function slackNotify(array $data)
 {
-    $attachments = [];
+    $blocks = [];
+    $add_image 
+        = 'https://img.freepik.com/free-icon/affirmative_318-2017.jpg';
+
+    $remove_image 
+        = 'https://img.freepik.com/free-icon/cutting-scissors_318-9373.jpg';
 
     foreach ($data as $entry) {
-        $attachments[] = [
-            'fields' => [
+        $blocks[] = [
+            'type' => 'context',
+            'elements' => [
                 [
-                    'title' => 'Name', 
-                    'value' => $entry['name'], 
-                    'short' => true,
+                    'type' => 'image',
+                    'image_url' => $entry['deleted'] ? $remove_image : $add_image,
+                    'alt_text' => $entry['deleted'] ? 'Removed' : 'Added',
                 ],
                 [
-                    'title' => 'Anniversary', 
-                    'value' => $entry['anniversary'], 
-                    'short' => true,
+                    'type' => 'mrkdwn',
+                    'text' => "Name: *{$entry['name']}*"
                 ],
                 [
-                    'title' => 'Created', 
-                    'value' => $entry['created'], 
-                    'short' => true,
+                    'type' => 'mrkdwn',
+                    'text' => "Anniversary: *{$entry['anniversary']}*"
                 ],
                 [
-                    'title' => 'Deleted', 
-                    'value' => $entry['deleted'], 
-                    'short' => true,
+                    'type' => 'mrkdwn',
+                    'text' => "Created: *{$entry['created']}*"
+                ],
+                [
+                    'type' => 'mrkdwn',
+                    'text' => "Deleted: *{$entry['deleted']}*"
                 ],
             ],
         ];      
     }
 
-    $webhook_data = [
-        'text' => 'Staff changes',
-        'attachments' => $attachments,
+    $webhook_data = [        
+        'text' => 'Staff Changes',
+        'blocks' => $blocks,
     ];
 
     $webhook_url = getenv('SLACK_WEBHOOK');
