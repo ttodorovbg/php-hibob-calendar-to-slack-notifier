@@ -1,0 +1,37 @@
+= PHP HiBob calendar to Sack notifier
+
+[start=1]
+. Create *.env* file
+[source,bash]
+----
+cp .env.template .env
+----
+[start=2]
+. Edit *.env* file and set correct values
+
+* *TIMEZONE* = _Europe/Sofia_
+* *CRONTAB* = _"0 11,17 * * *"_
+* *HIBOB_BIRTHDAYS_AND_WORK_ANNIVERSARIES_ICS_URL* = _https://cal.hibob.com/example_url_
+* *HIBOB_HOLIDAYS_ICS_URL* = _https://cal.hibob.com/example_url_
+* *SLACK_WEBHOOK_URL* = _https://hooks.slack.com/services/example_url_
+
+[start=3]
+. Build docker image
+[source,bash]
+----
+docker-compose build
+----
+
+[start=4]
+. Run container
+[source,bash]
+----
+docker-compose up -d app
+----
+
+[start=5]
+. Access container shell _(optional for debugging)_
+[source,bash]
+----
+docker-compose exec app sh
+----
