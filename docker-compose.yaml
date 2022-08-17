@@ -4,12 +4,17 @@ services:
   app:
     build:
       context: ./docker
-      dockerfile: Dockerfile      
+      dockerfile: Dockerfile
+      args:
+        TIMEZONE: "${TIMEZONE}"
+        CRONTAB: "${CRONTAB}"
+    restart: always  
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ./app:/home/calendar/app
+      - ./app:/home/hibob/app
     environment:
-      ICS_URL: ${ICS_URL}
-      SLACK_WEBHOOK: ${SLACK_WEBHOOK}
+      HIBOB_BIRTHDAYS_AND_WORK_ANNIVERSARIES_ICS_URL: "${HIBOB_BIRTHDAYS_AND_WORK_ANNIVERSARIES_ICS_URL}"
+      HIBOB_HOLIDAYS_ICS_URL: "${HIBOB_HOLIDAYS_ICS_URL}"
+      SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
     tty: true 
