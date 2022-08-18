@@ -1,5 +1,12 @@
 = PHP HiBob calendar to Sack notifier
 
+== Features
+* Small docker image size: *29.6MB*
+* Autostarting container
+* Adjustble crontab for notifications
+
+== Usage
+
 [start=1]
 . Create *.env* file
 [source,bash]
@@ -29,9 +36,19 @@ docker-compose build
 docker-compose up -d app
 ----
 
-[start=5]
-. Access container shell _(optional for debugging)_
+== Debug 
+* Access container shell 
 [source,bash]
 ----
 docker-compose exec app sh
+----
+* Check crontab
+[source,bash]
+----
+crontab -l
+----
+* Test notification
+[source,bash]
+----
+/usr/bin/php /home/hibob/app/index.php
 ----
