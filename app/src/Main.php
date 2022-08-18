@@ -21,7 +21,7 @@ class Main
     {
         Db::init();
         Cal::init();
-
+        
         $calendar_results = Cal::fetch();
         $db_active_users = Db::getActiveUsers();
 
@@ -43,10 +43,12 @@ class Main
         $data = DB::getDataForSlackNotification(
             array_merge($added_users, $deleted_users)
         );
+        
+        $data['holiday'] = Cal::fetchHolidays();
 
-        Db::close();        
-
+        Db::close(); 
+        
         Slack::notify($data);
-        Cal::archive($data);
+        Cal::cleanAndArchive($data);
     }
 }

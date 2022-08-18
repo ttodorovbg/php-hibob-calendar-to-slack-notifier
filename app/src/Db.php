@@ -36,6 +36,21 @@ class Db
                 `created` DATE DEFAULT CURRENT_DATE
             )'
         );
+
+        self::$db->query(
+            'CREATE TABLE IF NOT EXISTS `bdays_hdays_notified` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `name` VARCHAR,
+                `type` VARCHAR,
+                `created` DATE DEFAULT CURRENT_DATE
+            )'
+        );
+
+        // delete old notifications
+        self::$db->query(
+            'DELETE FROM `bdays_hdays_notified` 
+                WHERE `created` != CURRENT_DATE'
+        );        
     }
 
     /**
@@ -162,7 +177,15 @@ class Db
         
         if ($result->numColumns()) { 
             while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                $res['birthday'][] = $row;        
+                // check if notified
+                if (self::notified('birthday', $row['name'])) {
+
+                    continue;
+                }
+
+                $res['birthday'][] = $row;
+
+                self::addNotified('birthday', $row['name']);
             }
         }
 
@@ -177,5 +200,57 @@ class Db
     public static function close(): void
     {
         self::$db->close();
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $type 
+     * @param string $name 
+     * 
+     * @return boolean
+     */
+    public static function notified(string $type, string $name): bool
+    {
+        $stmt = self::$db->prepare(
+            'SELECT * FROM `bdays_hdays_notified` ' . 
+                'WHERE `type` = :type ' .
+                'AND `name` = :name'
+        );
+
+        $stmt->bindValue(':type', $type, SQLITE3_TEXT);
+        $stmt->bindValue(':name', $name, SQLITE3_TEXT);
+
+        $result = $stmt->execute();
+        
+        if ($result->numColumns()) { 
+            if ($result->fetchArray(SQLITE3_ASSOC)) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $type 
+     * @param string $name 
+     * 
+     * @return void
+     */
+    public static function addNotified(string $type, string $name): void
+    {
+        $stmt = self::$db->prepare(
+            'INSERT INTO `bdays_hdays_notified` (`type`, `name`) ' . 
+                'VALUES (:type, :name)'
+        );
+
+        $stmt->bindValue(':type', $type, SQLITE3_TEXT);
+        $stmt->bindValue(':name', $name, SQLITE3_TEXT);
+
+        $stmt->execute();
     }
 }

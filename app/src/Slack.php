@@ -21,20 +21,24 @@ class Slack
     {
         $blocks = [];
 
-        foreach (['changes', 'birthday'] as $index) {
+        foreach (['changes', 'birthday', 'holiday'] as $index) {
 
-            if (!count($data[$index])) {
+            if (!isset($data[$index]) 
+                || !is_array($data[$index]) 
+                || !count($data[$index])
+            ) {
                 continue;
             }
             
             foreach ($data[$index] as $entry) {
-                $prefix = ($index == 'birthday') ? 
-                    ':birthday:' : 
-                    (
-                        $entry['deleted'] ? 
+
+                $prefix = match ($index) {
+                    'birthday' => ':birthday:',
+                    'changes' => $entry['deleted'] ? 
                         ':heavy_minus_sign:' : 
-                        ':heavy_plus_sign:'
-                    );
+                        ':heavy_plus_sign:',
+                    'holiday' => ':palm_tree:',
+                };
 
                 $blocks[] = [
                     'type' => 'context',
@@ -47,15 +51,23 @@ class Slack
                         [
                             'type' => 'mrkdwn',
                             'text' => "Name: *{$entry['name']}* " . 
-                                "Anniv: *{$entry['anniversary']}* " .
                                 (
-                                    $entry['birthday'] ? 
-                                    "B-day: *{$entry['birthday']}* " : 
+                                    !empty($entry['anniversary']) ? 
+                                    "Anniv: *{$entry['anniversary']}* " : 
                                         ''
-                                ) .                                
-                                "Cre: *{$entry['created']}* " . 
+                                ) . 
                                 (
-                                    $entry['deleted'] ? 
+                                    !empty($entry['birthday']) ? 
+                                        "B-day: *{$entry['birthday']}* " : 
+                                        ''
+                                ) . 
+                                (
+                                    !empty($entry['created']) ? 
+                                        "Cre: *{$entry['created']}* " : 
+                                        ''
+                                ) . 
+                                (
+                                    !empty($entry['deleted']) ? 
                                         "Del: *{$entry['deleted']}*" : 
                                         ''
                                 ),
