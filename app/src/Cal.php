@@ -11,7 +11,19 @@ use ICal\ICal;
  */
 class Cal
 {
-    public static string $file_name;
+    /**
+     * Anniversaries and birthdays filename
+     *
+     * @var string
+     */
+    public static string $file_name1;
+
+    /**
+     * Holidays filename
+     *
+     * @var string
+     */
+    public static string $file_name2;
     
     /**
      * Undocumented function
@@ -20,7 +32,11 @@ class Cal
      */
     public static function init()
     {
-        self::$file_name = APP_DIR . '/ics/hibob-' . date('Y-m-d_h-i-s') . '.ics';
+        self::$file_name1 
+            = APP_DIR . '/ics/hibob-' . date('Y-m-d_h-i-s') . '.ics';
+
+        self::$file_name2 
+            = APP_DIR . '/ics/hibob-holidays-' . date('Y-m-d_h-i-s') . '.ics';
     }
 
     /**
@@ -39,11 +55,11 @@ class Cal
 
         $fetched_results = [];
         
-        file_put_contents(self::$file_name, $file_contents);
+        file_put_contents(self::$file_name1, $file_contents);
 
         try {
             $ical = new ICal(
-                self::$file_name, [
+                self::$file_name1, [
                     'defaultSpan'                 => 2,     // Default value
                     'defaultTimeZone'             => 'UTC',
                     'defaultWeekStart'            => 'MO',  // Default value
@@ -99,7 +115,7 @@ class Cal
     {
         if (!count($data['changes'])) {
             // delete file
-            unlink(self::$file_name);
+            unlink(self::$file_name1);
             print 'UNLINK';
             return;
         }
@@ -108,14 +124,68 @@ class Cal
 
         if ($zip->open(APP_DIR . '/ics/bob.ics.zip', \ZipArchive::CREATE) === true) {
             // Add files to the zip file
-            $zip->addFile(self::$file_name);
-            $zip->setCompressionName(self::$file_name, \ZipArchive::CM_LZMA, 9);
+            $zip->addFile(self::$file_name1);
+            $zip->setCompressionName(self::$file_name1, \ZipArchive::CM_LZMA, 9);
          
             $zip->close();
 
-            unlink(self::$file_name);
+            unlink(self::$file_name1);
         }
 
         return;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public static function fetchHolidays(): array
+    {
+        //$file_contents = file_get_contents(
+        //    getenv('HIBOB_HOLIDAYS_ICS_URL')
+        //);
+        
+            self::$file_name2 =APP_DIR . '/ics/hibob-holidays.ics';
+        
+
+        $fetched_results = [];
+        
+        //file_put_contents(self::$file_name2, $file_contents);
+
+        try {
+            $ical = new ICal(
+                self::$file_name2, [
+                    'defaultSpan'                 => 2,     // Default value
+                    'defaultTimeZone'             => 'UTC',
+                    'defaultWeekStart'            => 'MO',  // Default value
+                    'disableCharacterReplacement' => false, // Default value
+                    'filterDaysAfter'             => null,  // Default value
+                    'filterDaysBefore'            => null,  // Default value
+                    'httpUserAgent'               => null,  // Default value
+                    'skipRecurrence'              => false, // Default value
+                ]
+            );    
+        } catch (\Exception $e) {
+            print_r($e);
+
+            return [];
+        }
+
+        $today = new \DateTime(); // Today
+        
+        foreach ($ical->cal['VEVENT'] as $event) {
+
+            $start_date = new \DateTime($event['DTSTART']);
+            $end_date = new \DateTime($event['DTEND']);
+
+            if ($today >= $start_date && $today < $end_date) {
+                $fetched_results[] = [
+                    'name' => $event['DESCRIPTION'],
+                ];
+            }            
+        }
+
+        return $fetched_results;
     }
 }

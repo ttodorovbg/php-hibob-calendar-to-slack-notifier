@@ -19,9 +19,10 @@ class Main
      */
     public static function run(): void
     {
-        Db::init();
+        //Db::init();
         Cal::init();
-
+        
+        /*
         $calendar_results = Cal::fetch();
         $db_active_users = Db::getActiveUsers();
 
@@ -45,8 +46,14 @@ class Main
         );
 
         Db::close();        
+        */
 
+        $data['holiday'] = Cal::fetchHolidays();
+        
         Slack::notify($data);
-        Cal::archive($data);
+        //Cal::archive($data);
+        
+
+
     }
 }
