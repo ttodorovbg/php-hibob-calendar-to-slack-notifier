@@ -19,10 +19,9 @@ class Main
      */
     public static function run(): void
     {
-        //Db::init();
+        Db::init();
         Cal::init();
         
-        /*
         $calendar_results = Cal::fetch();
         $db_active_users = Db::getActiveUsers();
 
@@ -44,16 +43,12 @@ class Main
         $data = DB::getDataForSlackNotification(
             array_merge($added_users, $deleted_users)
         );
-
-        Db::close();        
-        */
-
+        
         $data['holiday'] = Cal::fetchHolidays();
+
+        Db::close(); 
         
         Slack::notify($data);
-        //Cal::archive($data);
-        
-
-
+        Cal::cleanAndArchive($data);
     }
 }
