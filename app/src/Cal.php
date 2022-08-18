@@ -111,8 +111,10 @@ class Cal
      * 
      * @return void
      */
-    public static function archive(array $data): void
+    public static function cleanAndArchive(array $data): void
     {
+        unlink(self::$file_name2);
+
         if (!count($data['changes'])) {
             // delete file
             unlink(self::$file_name1);
@@ -142,16 +144,16 @@ class Cal
      */
     public static function fetchHolidays(): array
     {
-        //$file_contents = file_get_contents(
-        //    getenv('HIBOB_HOLIDAYS_ICS_URL')
-        //);
+        $file_contents = file_get_contents(
+            getenv('HIBOB_HOLIDAYS_ICS_URL')
+        );
         
-            self::$file_name2 =APP_DIR . '/ics/hibob-holidays.ics';
+        //self::$file_name2 =APP_DIR . '/ics/hibob-holidays.ics';
         
 
         $fetched_results = [];
         
-        //file_put_contents(self::$file_name2, $file_contents);
+        file_put_contents(self::$file_name2, $file_contents);
 
         try {
             $ical = new ICal(
@@ -180,9 +182,17 @@ class Cal
             $end_date = new \DateTime($event['DTEND']);
 
             if ($today >= $start_date && $today < $end_date) {
+
+                if (Db::notified('holiday', $event['DESCRIPTION'])) {
+
+                    continue;
+                }
+
                 $fetched_results[] = [
                     'name' => $event['DESCRIPTION'],
                 ];
+
+                Db::addNotified('holiday', $event['DESCRIPTION']);
             }            
         }
 
