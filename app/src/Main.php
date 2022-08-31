@@ -21,13 +21,13 @@ class Main
     {
         Db::init();
         Cal::init();
-        
+
         $calendar_results = Cal::fetch();
         $db_active_users = Db::getActiveUsers();
 
         $deleted_users = [];
 
-        foreach ($db_active_users as $user) { 
+        foreach ($db_active_users as $user) {
             if (empty($calendar_results[$user['name']][$user['anniversary']])) {
                 // missing user from calendar
                 $deleted_users[] = $user['id'];
@@ -39,15 +39,16 @@ class Main
         $added_users = Db::addNewUsers($calendar_results);
 
         Db::deleteUsers($deleted_users);
-        
+
         $data = DB::getDataForSlackNotification(
             array_merge($added_users, $deleted_users)
         );
-        
-        $data['holiday'] = Cal::fetchHolidays();
 
-        Db::close(); 
-        
+        $data['holiday'] = Cal::fetchHolidays();
+        $data['total'][] = ['total' => count($db_active_users)];
+
+        Db::close();
+
         Slack::notify($data);
         Cal::cleanAndArchive($data);
     }
