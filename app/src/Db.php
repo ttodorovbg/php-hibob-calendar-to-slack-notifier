@@ -21,7 +21,7 @@ class Db
     public static function init(): void
     {
         self::$db = new SQLite3(
-            APP_DIR . '/sqlite/db.sqlite', 
+            APP_DIR . '/sqlite/db.sqlite',
             SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE
         );
 
@@ -50,7 +50,7 @@ class Db
         self::$db->query(
             'DELETE FROM `bdays_hdays_notified` 
                 WHERE `created` != CURRENT_DATE'
-        );        
+        );
     }
 
     /**
@@ -63,12 +63,12 @@ class Db
         $stmt = self::$db->prepare('SELECT * FROM `users` where `deleted` is null');
 
         $result = $stmt->execute();
-        
+
         $users = [];
-        
-        if ($result->numColumns()) { 
-            while ($row = $result->fetchArray(SQLITE3_ASSOC)) { 
-                $users[] = $row;        
+
+        if ($result->numColumns()) {
+            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $users[] = $row;
             }
         }
 
@@ -78,8 +78,8 @@ class Db
     /**
      * Undocumented function
      *
-     * @param array $calendar_results 
-     * 
+     * @param array $calendar_results
+     *
      * @return array
      */
     public static function addNewUsers(array $calendar_results): array
@@ -87,14 +87,12 @@ class Db
         $added_user_ids = [];
 
         $stmt = self::$db->prepare(
-            'INSERT INTO `users` (`name`, `anniversary`, `birthday`) ' . 
+            'INSERT INTO `users` (`name`, `anniversary`, `birthday`) ' .
                 'VALUES(:name, :anniversary, :birthday)'
         );
-        
+
         foreach ($calendar_results as $name => $_arr) {
-            
             foreach ($_arr as $anniversary => $birthday) {
-        
                 if (!$birthday) {
                     continue;
                 }
@@ -106,21 +104,21 @@ class Db
                 $stmt->bindValue(':name', $name, SQLITE3_TEXT);
                 $stmt->bindValue(':anniversary', $anniversary, SQLITE3_TEXT);
                 $stmt->bindValue(':birthday', $birthday, SQLITE3_TEXT);
-            
+
                 $stmt->execute();
-                
-                $added_user_ids[] = self::$db->lastInsertRowID();                
-            }    
+
+                $added_user_ids[] = self::$db->lastInsertRowID();
+            }
         }
 
-        return $added_user_ids; 
+        return $added_user_ids;
     }
 
     /**
      * Undocumented function
      *
-     * @param array $deleted_users 
-     * 
+     * @param array $deleted_users
+     *
      * @return void
      */
     public static function deleteUsers(array $deleted_users): void
@@ -131,7 +129,7 @@ class Db
         );
 
         foreach ($deleted_users as $user_id) {
-            $stmt->bindValue(':id', $user_id, SQLITE3_INTEGER);            
+            $stmt->bindValue(':id', $user_id, SQLITE3_INTEGER);
             $stmt->execute();
         }
     }
@@ -139,8 +137,8 @@ class Db
     /**
      * Undocumented function
      *
-     * @param array $user_ids 
-     * 
+     * @param array $user_ids
+     *
      * @return array
      */
     public static function getDataForSlackNotification(array $user_ids): array
@@ -154,15 +152,15 @@ class Db
             $stmt = self::$db->prepare(
                 'SELECT * FROM `users` WHERE `id` IN(' . $in . ') ORDER BY `deleted`'
             );
-    
+
             $result = $stmt->execute();
-                        
-            if ($result->numColumns()) { 
+
+            if ($result->numColumns()) {
                 while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $res['changes'][] = $row;        
+                    $res['changes'][] = $row;
                 }
             }
-        }        
+        }
 
         // birthday
         $res['birthday'] = [];
@@ -174,12 +172,11 @@ class Db
         $stmt->bindValue(':birthday', date("md"), SQLITE3_TEXT);
 
         $result = $stmt->execute();
-        
-        if ($result->numColumns()) { 
+
+        if ($result->numColumns()) {
             while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 // check if notified
                 if (self::notified('birthday', $row['name'])) {
-
                     continue;
                 }
 
@@ -205,15 +202,15 @@ class Db
     /**
      * Undocumented function
      *
-     * @param string $type 
-     * @param string $name 
-     * 
+     * @param string $type
+     * @param string $name
+     *
      * @return boolean
      */
     public static function notified(string $type, string $name): bool
     {
         $stmt = self::$db->prepare(
-            'SELECT * FROM `bdays_hdays_notified` ' . 
+            'SELECT * FROM `bdays_hdays_notified` ' .
                 'WHERE `type` = :type ' .
                 'AND `name` = :name'
         );
@@ -222,10 +219,9 @@ class Db
         $stmt->bindValue(':name', $name, SQLITE3_TEXT);
 
         $result = $stmt->execute();
-        
-        if ($result->numColumns()) { 
-            if ($result->fetchArray(SQLITE3_ASSOC)) {
 
+        if ($result->numColumns()) {
+            if ($result->fetchArray(SQLITE3_ASSOC)) {
                 return true;
             }
         }
@@ -236,15 +232,15 @@ class Db
     /**
      * Undocumented function
      *
-     * @param string $type 
-     * @param string $name 
-     * 
+     * @param string $type
+     * @param string $name
+     *
      * @return void
      */
     public static function addNotified(string $type, string $name): void
     {
         $stmt = self::$db->prepare(
-            'INSERT INTO `bdays_hdays_notified` (`type`, `name`) ' . 
+            'INSERT INTO `bdays_hdays_notified` (`type`, `name`) ' .
                 'VALUES (:type, :name)'
         );
 

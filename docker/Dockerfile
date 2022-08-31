@@ -17,6 +17,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 RUN mkdir -p /home/hibob/app
 COPY docker-entrypoint.sh /home/hibob/docker-entrypoint.sh
-RUN chmod 777 -R /home/hibob/
+RUN chmod +x /home/hibob/docker-entrypoint.sh
+WORKDIR /home/hibob/app
 
 ENTRYPOINT ["/sbin/tini", "--", "/home/hibob/docker-entrypoint.sh"]
