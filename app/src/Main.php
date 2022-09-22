@@ -45,6 +45,7 @@ class Main
         );
 
         $data['holiday'] = Cal::fetchHolidays();
+        $db_active_users = Db::getActiveUsers();
         $data['total'][] = ['total' => count($db_active_users)];
 
         Db::close();
