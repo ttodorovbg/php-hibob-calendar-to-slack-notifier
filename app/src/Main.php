@@ -36,13 +36,11 @@ class Main
             }
         }
 
-        $added_users = Db::addNewUsers($calendar_results);
+        $added_users = Db::addNewUsers(calendar_results: $calendar_results);
 
-        Db::deleteUsers($deleted_users);
+        Db::deleteUsers(deleted_users: $deleted_users);
 
-        $data = DB::getDataForSlackNotification(
-            array_merge($added_users, $deleted_users)
-        );
+        $data = DB::getDataForSlackNotification(user_ids: array_merge($added_users, $deleted_users));
 
         $data['holiday'] = Cal::fetchHolidays();
         $db_active_users = Db::getActiveUsers();
@@ -50,7 +48,7 @@ class Main
 
         Db::close();
 
-        Slack::notify($data);
-        Cal::cleanAndArchive($data);
+        Slack::notify(data: $data);
+        Cal::cleanAndArchive(data: $data);
     }
 }
