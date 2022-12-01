@@ -1,4 +1,4 @@
-= PHP HiBob calendar to Sack notifier
+= PHP HiBob calendar to Slack notifier
 
 == Features
 * Small docker image size: *29.6MB*

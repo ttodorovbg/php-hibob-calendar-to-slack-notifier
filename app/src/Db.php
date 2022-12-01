@@ -182,7 +182,7 @@ class Db
 
                 $res['birthday'][] = $row;
 
-                self::addNotified('birthday', $row['name']);
+                self::addNotified(type: 'birthday', name: $row['name']);
             }
         }
 

@@ -101,6 +101,10 @@ class Cal
                 = ($name == $b_name) ? $birthday : true;
         }
 
+        if (!count($fetched_results)) {
+            die("Empty results");
+        }
+
         return $fetched_results;
     }
 
