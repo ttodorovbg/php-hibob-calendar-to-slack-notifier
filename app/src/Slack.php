@@ -20,7 +20,7 @@ class Slack
         $blocks = [];
         $notify = false;
 
-        // send max 20 line per chunk to prevdent slack limit
+        // send max 20 lines per chunk to prevdent slack limit
 
         while (true) {
             $cnt = 0;
